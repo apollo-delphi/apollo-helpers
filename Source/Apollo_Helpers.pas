@@ -2,9 +2,6 @@ unit Apollo_Helpers;
 
 interface
 
-uses
-  Apollo_Types;
-
 type
   TStringTools = record
     class function GetHash(const aStr: string): string; static;
@@ -19,11 +16,6 @@ type
     function Contains(const aValue: string): Boolean;
     function CommaText: string;
     function Count: Integer;
-  end;
-
-  TSimpleMethodsHelper = record helper for TSimpleMethods
-    procedure Add(aSimpleMethod: TSimpleMethod);
-    procedure Exec;
   end;
 
 implementation
@@ -65,21 +57,6 @@ end;
 class function TStringTools.GetHash16(const aStr: string): string;
 begin
   Result := GetHash(aStr).Substring(0, 15);
-end;
-
-{TSimpleMethodsHelper}
-
-procedure TSimpleMethodsHelper.Add(aSimpleMethod: TSimpleMethod);
-begin
-  Self := Self + [aSimpleMethod];
-end;
-
-procedure TSimpleMethodsHelper.Exec;
-var
-  SimpleMethod: TSimpleMethod;
-begin
-  for SimpleMethod in Self do
-    SimpleMethod;
 end;
 
 {TFileTools}
