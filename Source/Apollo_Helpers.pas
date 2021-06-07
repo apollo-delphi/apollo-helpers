@@ -2,6 +2,9 @@ unit Apollo_Helpers;
 
 interface
 
+uses
+  System.Classes;
+
 type
   TStringTools = record
     class function GetHash(const aStr: string): string; static;
@@ -9,6 +12,7 @@ type
   end;
 
   TFileTools = record
+    class function CreateFileStream(const aFilePath: string): TFileStream; static;
     class function GetFiles(const aDirectoryPath: string): TArray<string>; static;
   end;
 
@@ -64,6 +68,11 @@ end;
 class function TFileTools.GetFiles(const aDirectoryPath: string): TArray<string>;
 begin
   Result := TDirectory.GetFiles(aDirectoryPath, '*', TSearchOption.soAllDirectories);
+end;
+
+class function TFileTools.CreateFileStream(const aFilePath: string): TFileStream;
+begin
+  Result := TFile.OpenRead(aFilePath);
 end;
 
 end.
