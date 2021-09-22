@@ -13,7 +13,9 @@ type
 
   TFileTools = record
     class function CreateFileStream(const aFilePath: string): TFileStream; static;
-    class function GetFiles(const aDirectoryPath: string): TArray<string>; static;
+    class function GetFiles(const aDirectoryPath: string; const aAllDirectories: Boolean = True): TArray<string>; static;
+    class procedure ClearDirectory(const aDirectoryPath: string); static;
+    class procedure CreateDirIfNotExists(const aDirectoryPath: string); static;
   end;
 
   TStrArrHelper = record helper for TArray<string>
@@ -25,6 +27,8 @@ type
   TIntArrHelper = record helper for TArray<Integer>
     function CommaText: string;
     function Count: Integer;
+    function IsEmpty: Boolean;
+    procedure Clear;
     procedure SplitCommaText(const aText: string);
   end;
 
@@ -36,6 +40,16 @@ uses
   System.SysUtils;
 
 {TIntArrHelper}
+
+function TIntArrHelper.IsEmpty: Boolean;
+begin
+  Result := Length(Self) = 0;
+end;
+
+procedure TIntArrHelper.Clear;
+begin
+  SetLength(Self, 0);
+end;
 
 function TIntArrHelper.Count: Integer;
 begin
@@ -104,14 +118,34 @@ end;
 
 {TFileTools}
 
-class function TFileTools.GetFiles(const aDirectoryPath: string): TArray<string>;
+class procedure TFileTools.CreateDirIfNotExists(const aDirectoryPath: string);
 begin
-  Result := TDirectory.GetFiles(aDirectoryPath, '*', TSearchOption.soAllDirectories);
+  if not TDirectory.Exists(aDirectoryPath) then
+    TDirectory.CreateDirectory(aDirectoryPath);
+end;
+
+class procedure TFileTools.ClearDirectory(const aDirectoryPath: string);
+var
+  FilePath: string;
+  FilePaths: TArray<string>;
+begin
+  FilePaths := GetFiles(aDirectoryPath, False{aAllDirectories});
+
+  for FilePath in FilePaths do
+    TFile.Delete(FilePath);
+end;
+
+class function TFileTools.GetFiles(const aDirectoryPath: string; const aAllDirectories: Boolean = True): TArray<string>;
+begin
+  if aAllDirectories then
+    Result := TDirectory.GetFiles(aDirectoryPath, '*', TSearchOption.soAllDirectories)
+  else
+    Result := TDirectory.GetFiles(aDirectoryPath, '*', TSearchOption.soTopDirectoryOnly);
 end;
 
 class function TFileTools.CreateFileStream(const aFilePath: string): TFileStream;
 begin
-  Result := TFile.OpenRead(aFilePath);
+  Result := TFile.OpenWrite(aFilePath);
 end;
 
 end.
