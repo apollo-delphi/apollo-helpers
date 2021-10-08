@@ -7,6 +7,7 @@ uses
 
 type
   TStringTools = record
+    class function FillSpacesToLength(const aStr: string; const aLength: Integer): string; static;
     class function GetHash(const aStr: string): string; static;
     class function GetHash16(const aStr: string): string; static;
   end;
@@ -30,6 +31,23 @@ type
     function IsEmpty: Boolean;
     procedure Clear;
     procedure SplitCommaText(const aText: string);
+  end;
+
+  TColumnInfo = record
+    AllowSort: Boolean;
+    DefaultWidth: Integer;
+    FieldName: string;
+    Index: Integer;
+    Title: string;
+    constructor Create(const aIndex: Integer; const aTitle, aFieldName: string;
+      const aDefaultWidth: Integer; const aAllowSort: Boolean);
+  end;
+
+  TColumnInfoHelper = record helper for TArray<TColumnInfo>
+    function GetDefaultWidths: TArray<Integer>;
+    function GetFieldName(const aIndex: Integer): string;
+    function GetTitles: TArray<string>;
+    function IsSortColumn(const aIndex: Integer): Boolean;
   end;
 
 implementation
@@ -106,6 +124,16 @@ end;
 
 {TStringTools}
 
+class function TStringTools.FillSpacesToLength(const aStr: string; const aLength: Integer): string;
+var
+  i: Integer;
+begin
+  Result := aStr;
+
+  for i := Length(aStr) to aLength do
+    Result := Result + ' ';
+end;
+
 class function TStringTools.GetHash(const aStr: string): string;
 begin
   Result := THashMD5.GetHashString(aStr).ToUpper;
@@ -145,7 +173,63 @@ end;
 
 class function TFileTools.CreateFileStream(const aFilePath: string): TFileStream;
 begin
-  Result := TFile.OpenWrite(aFilePath);
+  Result := TFile.OpenRead(aFilePath);
+end;
+
+{ TColumnInfo }
+
+constructor TColumnInfo.Create(const aIndex: Integer; const aTitle, aFieldName: string;
+  const aDefaultWidth: Integer; const aAllowSort: Boolean);
+begin
+  Index := aIndex;
+  Title := aTitle;
+  FieldName := aFieldName;
+  DefaultWidth := aDefaultWidth;
+  AllowSort := aAllowSort;
+end;
+
+{ TColumnInfoHelper }
+
+function TColumnInfoHelper.GetTitles: TArray<string>;
+var
+  ColumnInfo: TColumnInfo;
+begin
+  Result := [];
+
+  for ColumnInfo in Self do
+    Result := Result + [ColumnInfo.Title];
+end;
+
+function TColumnInfoHelper.GetDefaultWidths: TArray<Integer>;
+var
+  ColumnInfo: TColumnInfo;
+begin
+  Result := [];
+
+  for ColumnInfo in Self do
+    Result := Result + [ColumnInfo.DefaultWidth];
+end;
+
+function TColumnInfoHelper.IsSortColumn(const aIndex: Integer): Boolean;
+var
+  ColumnInfo: TColumnInfo;
+begin
+  Result := False;
+
+  for ColumnInfo in Self do
+    if (ColumnInfo.Index = aIndex) and ColumnInfo.AllowSort then
+      Exit(True);
+end;
+
+function TColumnInfoHelper.GetFieldName(const aIndex: Integer): string;
+var
+  ColumnInfo: TColumnInfo;
+begin
+  Result := '';
+
+  for ColumnInfo in Self do
+    if ColumnInfo.Index = aIndex then
+      Exit(ColumnInfo.FieldName);
 end;
 
 end.
