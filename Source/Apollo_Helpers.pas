@@ -7,9 +7,11 @@ uses
 
 type
   TStringTools = record
+    class function CutToKey(const aStr, aKey: string; aKeyNum: Integer = 1): string; static;
     class function FillSpacesToLength(const aStr: string; const aLength: Integer): string; static;
     class function GetHash(const aStr: string): string; static;
     class function GetHash16(const aStr: string): string; static;
+    class function SubStrByKey(const aStr, aFirstKey, aLastKey: string; aFirstKeyNum: integer = 1): string; static;
   end;
 
   TFileTools = record
@@ -123,6 +125,33 @@ begin
 end;
 
 {TStringTools}
+
+class function TStringTools.CutToKey(const aStr, aKey: string; aKeyNum: Integer): string;
+var
+  i: Integer;
+begin
+  Result := aStr;
+
+  for i := 1 to aKeyNum do
+    Result := Result.Remove(0, Result.IndexOf(aKey) + aKey.Length);
+end;
+
+class function TStringTools.SubStrByKey(const aStr, aFirstKey, aLastKey: string; aFirstKeyNum: Integer): string;
+begin
+  Result := aStr;
+
+  Result := CutToKey(Result, aFirstKey, aFirstKeyNum - 1);
+
+  if Result.Contains(aFirstKey) or
+     aFirstKey.IsEmpty
+  then
+    begin
+      Result := Result.Substring(Result.IndexOf(aFirstKey) + aFirstKey.Length, Result.Length);
+      Result := Result.Remove(Result.IndexOf(aLastKey), Result.Length);
+    end
+  else
+    Result := '';
+end;
 
 class function TStringTools.FillSpacesToLength(const aStr: string; const aLength: Integer): string;
 var
