@@ -9,6 +9,7 @@ type
   TStringTools = record
     class function CutToKey(const aStr, aKey: string; aKeyNum: Integer = 1): string; static;
     class function FillSpacesToLength(const aStr: string; const aLength: Integer): string; static;
+    class function GetFirstNotEmpty(const aStrArr: TArray<string>): string; static;
     class function GetHash(const aStr: string): string; static;
     class function GetHash16(const aStr: string): string; static;
     class function SubStrByKey(const aStr, aFirstKey, aLastKey: string; aFirstKeyNum: integer = 1): string; static;
@@ -22,9 +23,10 @@ type
   end;
 
   TStrArrHelper = record helper for TArray<string>
-    function Contains(const aValue: string): Boolean;
     function CommaText: string;
+    function Contains(const aValue: string): Boolean;
     function Count: Integer;
+    function GetFirstNotEmpty: string;
   end;
 
   TIntArrHelper = record helper for TArray<Integer>
@@ -104,6 +106,17 @@ end;
 
 {TStrArrHelper}
 
+function TStrArrHelper.GetFirstNotEmpty: string;
+var
+  Value: string;
+begin
+  Result := '';
+
+  for Value in Self do
+    if not Value.IsEmpty then
+      Exit(Value);
+end;
+
 function TStrArrHelper.Contains(const aValue: string): Boolean;
 var
   Value: string;
@@ -171,6 +184,11 @@ end;
 class function TStringTools.GetHash16(const aStr: string): string;
 begin
   Result := GetHash(aStr).Substring(0, 15);
+end;
+
+class function TStringTools.GetFirstNotEmpty(const aStrArr: TArray<string>): string;
+begin
+  Result := aStrArr.GetFirstNotEmpty;
 end;
 
 {TFileTools}
