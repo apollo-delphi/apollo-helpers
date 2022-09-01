@@ -212,10 +212,18 @@ end;
 
 class function TFileTools.GetFiles(const aDirectoryPath: string; const aAllDirectories: Boolean = True): TArray<string>;
 begin
-  if aAllDirectories then
-    Result := TDirectory.GetFiles(aDirectoryPath, '*', TSearchOption.soAllDirectories)
+  if TDirectory.Exists(aDirectoryPath) then
+  begin
+    if aAllDirectories then
+      Result := TDirectory.GetFiles(aDirectoryPath, '*', TSearchOption.soAllDirectories)
+    else
+      Result := TDirectory.GetFiles(aDirectoryPath, '*', TSearchOption.soTopDirectoryOnly);
+  end
   else
-    Result := TDirectory.GetFiles(aDirectoryPath, '*', TSearchOption.soTopDirectoryOnly);
+  if TFile.Exists(aDirectoryPath) then
+    Result := [aDirectoryPath]
+  else
+    Result := [];
 end;
 
 class function TFileTools.CreateFileStream(const aFilePath: string): TFileStream;
